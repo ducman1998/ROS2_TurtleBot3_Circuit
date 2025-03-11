@@ -106,8 +106,6 @@ class RobotPathVisualizer(Node):
         # Set the image as texture (path to your image file)
         marker.mesh_resource = f"file://{self.bg_fp}"
         marker.points = []
-        # Using sin to create a rotation around the Z-axis
-        # marker.pose.orientation.z = math.pi/2
         marker_array = MarkerArray()
         marker_array.markers.append(marker)
         self.points_publisher.publish(marker_array)

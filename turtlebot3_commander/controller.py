@@ -262,7 +262,7 @@ class Commander(Node):
         self.get_logger().info(f"Sending a command: vx={vx} m/sec, ang.z={omegaz} rad/sec")
         
     def cam_callback(self, msg):
-        # this function processes image from camera, it stores image to a variable for being used in control loop
+        # this function processes image from camera, it stores image in a variable for being used in control loop
         current_frame = self.br.imgmsg_to_cv2(msg)
         current_frame = cv2.cvtColor(current_frame, cv2.COLOR_BGR2RGB)
         if current_frame.shape[0] != IM_H or current_frame.shape[1] != IM_W:
