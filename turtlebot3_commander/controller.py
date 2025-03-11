@@ -34,6 +34,13 @@ KP = 5.0
 KI = 0.001
 KD = 0.25 
 
+# parameters for laser scan
+MAX_LIDAR_DISTANCE = 3.5  # in meters
+COLLISION_DISTANCE = 0.4 # in meters
+# only stop if detect obstacles in range 0.25m ahead of the robot, ranging: [-60,60]
+ANGLE_MAX = 30  # degree
+ANGLE_MIN = -30 # degree 
+
 last_vel = 0.0 
 last_omegaz = 0.0
 
@@ -42,6 +49,9 @@ class Commander(Node):
         super().__init__('turtlebot3_commander')
         # subcribe this topic to read camera images in simulation
         self.scan_sub = self.create_subscription(Image, '/Pi_Camera/image_raw', self.cam_callback, 10)
+        
+        # subcribe this topic to read laser scan
+        self.scan_sub = self.create_subscription(LaserScan, "scan", self.scan_callback, 10)
         
         # publish command velocities to control the turtlebot (a Twist includes both linear and angular velocities)
         self.cmd_vel_publisher = self.create_publisher(Twist, '/cmd_vel', 10)
@@ -109,6 +119,9 @@ class Commander(Node):
         # Create a Twist message to send to /cmd_vel topic
         self.twist = Twist()
         
+        # a variable stores minimum laser distance
+        self.min_dis_to_obstacles = 100000
+        
         # variables for visulization (real robot position, odom position, 
         # planned position - center of mass of lane transformed into odom frame), xy only
         self.positions = RobotPositions()
@@ -158,13 +171,18 @@ class Commander(Node):
         '''
         Use a timer 20hz serving as sampling time for controller, this function will:
         (1) rectify image 
-        (2) image processing
+        (2) image processing on the rectified image
         (3) predict straight score of the lane sensed by the carmera
-        (4) segment lane to find center of mass point
+        (4) segment lane to find center of mass point (CoM)
         (5) measure error and generate pid control signal (control angular velocity)
         (6) send velocity command to /cmd_vel topic
         '''
         global last_vel, last_omegaz
+        
+        if self.min_dis_to_obstacles <= COLLISION_DISTANCE:
+            self.move(0.0, 0.0)
+            # stop the robot immediately
+            exit()
         
         if self.last_frame is None:
             # ignore this timestep due to no new captured image
@@ -270,6 +288,13 @@ class Commander(Node):
         self.last_frame = current_frame
         self.timestamp = time.time()
         
+    def scan_callback(self, msg):
+        # self.get_logger().info(f"Get msg from lazerScan: {len(msg.ranges)}")
+        (lidar, angles) = lidarScan(msg)
+        lidar_horizon = np.concatenate((lidar[360+ANGLE_MIN:], lidar[0:ANGLE_MAX]))
+        # angles_horizon = np.linspace(90+ANGLE_MIN, 90+ANGLE_MAX, ANGLE_MAX - ANGLE_MIN) 
+        self.min_dis_to_obstacles = np.min(lidar_horizon)
+        
     def gazebo_state_callback(self, msg: ModelStates):
         '''
         This callback will receive real position from the Gazebo simulation engine, using for visualization to 
@@ -339,6 +364,28 @@ class Commander(Node):
             return 
         
         return largest_component
+    
+def lidarScan(msgScan):
+    distances = np.array([])
+    angles = np.array([])
+
+    for i in range(len(msgScan.ranges)):
+        angle = degrees(i * msgScan.angle_increment)
+        if (msgScan.ranges[i] > MAX_LIDAR_DISTANCE):
+            distance = MAX_LIDAR_DISTANCE
+        elif (msgScan.ranges[i] < msgScan.range_min):
+            distance = msgScan.range_min
+            # # For real robot - protection
+            # if msgScan.ranges[i] < 0.01:
+            #     distance = MAX_LIDAR_DISTANCE
+        else:
+            distance = msgScan.ranges[i]
+
+        distances = np.append(distances, distance)
+        angles = np.append(angles, angle)
+
+    # distances in [m], angles in [degrees]
+    return ( distances, angles )
 
 def stop_robot():
     rclpy.init()    
