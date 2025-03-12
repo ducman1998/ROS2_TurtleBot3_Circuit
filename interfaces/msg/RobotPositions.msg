@@ -1,0 +1,6 @@
+float32 real_pos_x
+float32 real_pos_y
+float32 odom_pos_x
+float32 odom_pos_y
+float32 planned_pos_x
+float32 planned_pos_y 
