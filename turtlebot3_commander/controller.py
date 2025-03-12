@@ -37,7 +37,7 @@ KD = 0.25
 # parameters for laser scan
 MAX_LIDAR_DISTANCE = 3.5  # in meters
 COLLISION_DISTANCE = 0.4 # in meters
-# only stop if detect obstacles in range 0.25m ahead of the robot, ranging: [-60,60]
+# only stop if detect obstacles in range 0.4m ahead of the robot, ranging: [-30,30]
 ANGLE_MAX = 30  # degree
 ANGLE_MIN = -30 # degree 
 
