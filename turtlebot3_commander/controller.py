@@ -48,7 +48,7 @@ class Commander(Node):
     def __init__(self):
         super().__init__('turtlebot3_commander')
         # subcribe this topic to read camera images in simulation
-        self.scan_sub = self.create_subscription(Image, '/Pi_Camera/image_raw', self.cam_callback, 10)
+        self.im_sub = self.create_subscription(Image, '/Pi_Camera/image_raw', self.cam_callback, 10)
         
         # subcribe this topic to read laser scan
         self.scan_sub = self.create_subscription(LaserScan, "scan", self.scan_callback, 10)
