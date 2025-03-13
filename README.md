@@ -29,4 +29,4 @@ ros2 run turtlebot3_commander start_visualizer
 ``` 
 rviz2 
 ```
-![Alt Text](materials/rviz2_example.png)
+![Alt Text](turtlebot3_commander/materials/rviz2_example.png)
