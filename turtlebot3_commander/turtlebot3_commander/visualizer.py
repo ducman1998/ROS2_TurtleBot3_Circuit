@@ -128,10 +128,10 @@ class RobotPathVisualizer(Node):
         
         # add real position
         self.idx += 1
-        odom_marker = self.create_marker(self.idx, Point(x=msg.odom_pos_x, y=msg.odom_pos_y, z=0.15), color="red", name_space="RealPosition")
+        r_marker = self.create_marker(self.idx, Point(x=msg.real_pos_x, y=msg.real_pos_y, z=0.15), color="red", name_space="RealPosition")
         # add robot position in the odom frame
         self.idx += 1
-        r_marker = self.create_marker(self.idx, Point(x=msg.real_pos_x, y=msg.real_pos_y, z=0.15), color="green", name_space="OdomPosition")
+        odom_marker = self.create_marker(self.idx, Point(x=msg.odom_pos_x, y=msg.odom_pos_y, z=0.15), color="green", name_space="OdomPosition")
         # add measured point (CoM) in the odom frame
         self.idx += 1
         planned_marker = self.create_marker(self.idx, Point(x=msg.planned_pos_x, y=msg.planned_pos_y, z=0.15), color="blue", name_space="MeasuredPosition")
